@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/apex-algo-landing", "destination": "/apex-algo-landing.html" },
+    { "source": "/((?!apex-algo-landing).*)", "destination": "/index.html" }
+  ]
+}
