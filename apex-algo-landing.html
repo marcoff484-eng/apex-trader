@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Algo — AI-Powered Trading Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050c18;
+    --surface: #0a1628;
+    --border: #0f2040;
+    --accent: #0ea5e9;
+    --accent2: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #475569;
+    --dimmed: #1e3a5f;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(14,165,233,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,165,233,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  section, nav, footer { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,12,24,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: var(--text);
+  }
+  .nav-logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff; font-weight: 700;
+  }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 12px;
+    letter-spacing: 0.12em; font-weight: 500; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .btn-nav {
+    background: var(--accent); color: #fff; border: none;
+    padding: 9px 22px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    cursor: pointer; clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: opacity 0.2s;
+  }
+  .btn-nav:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 24px 60px;
+    position: relative;
+  }
+
+  /* Radial glow */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(14,165,233,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    display: block;
+    width: 40px; height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 7vw, 88px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: #f8fafc;
+    margin-bottom: 8px;
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero h1 .block {
+    display: block;
+    font-size: clamp(14px, 2vw, 20px);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    font-size: clamp(14px, 1.8vw, 17px);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+    margin: 24px auto 40px;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 16px 40px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: #0284c7; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 15px 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 10px 0;
+    margin-top: 64px;
+  }
+  .ticker-track {
+    display: flex;
+    gap: 48px;
+    animation: ticker 22s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .ticker-sym { color: var(--text); }
+  .ticker-val { color: var(--accent2); }
+  .ticker-chg { font-size: 10px; }
+  .up { color: var(--accent2); }
+  .dn { color: var(--danger); }
+
+  /* ── STATS BAND ── */
+  .stats-band {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-item {
+    flex: 1;
+    max-width: 220px;
+    padding: 40px 24px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    color: #f8fafc;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .feature-card {
+    background: var(--bg);
+    padding: 36px 32px;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .feature-card:hover { background: var(--surface); }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-icon {
+    font-size: 24px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+  }
+  .feature-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .feature-tag {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    border: 1px solid var(--dimmed);
+    padding: 3px 10px;
+    font-weight: 600;
+  }
+
+  /* ── STRATEGY CARDS ── */
+  .strategy-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .strat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 24px;
+    position: relative;
+  }
+  .strat-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .strat-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .strat-badge {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    padding: 3px 8px;
+  }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 48px;
+  }
+  .price-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 40px 32px;
+    position: relative;
+  }
+  .price-card.featured {
+    border-color: var(--accent);
+    background: #071828;
+  }
+  .price-card.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -1px; left: 50%; transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    padding: 4px 16px;
+  }
+  .price-tier {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    color: #f8fafc;
+    line-height: 1;
+  }
+  .price-amount sup { font-size: 22px; vertical-align: super; }
+  .price-amount sub { font-size: 16px; color: var(--muted); font-family: 'IBM Plex Mono'; font-weight: 400; }
+  .price-desc { font-size: 12px; color: var(--muted); margin: 12px 0 28px; line-height: 1.6; }
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .price-features li {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .price-features li::before { content: '→'; color: var(--accent2); flex-shrink: 0; }
+  .price-features li.dimmed::before { color: var(--muted); content: '·'; }
+  .price-features li.dimmed { opacity: 0.4; }
+
+  .btn-price {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-align: center;
+    text-decoration: none;
+  }
+  .btn-price.primary { background: var(--accent); color: #fff; }
+  .btn-price.primary:hover { background: #0284c7; }
+  .btn-price.outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-price.outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── FAQ ── */
+  .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    padding: 22px 28px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #cbd5e1;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: background 0.15s;
+  }
+  .faq-q:hover { background: var(--surface); }
+  .faq-q span.arrow { color: var(--accent); font-size: 16px; transition: transform 0.2s; }
+  .faq-a {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    padding: 0 28px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  .faq-item.open .faq-a { max-height: 200px; padding: 0 28px 20px; }
+  .faq-item.open .arrow { transform: rotate(45deg); }
+
+  /* ── TERMINAL DEMO ── */
+  .terminal {
+    background: #020810;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .terminal-bar {
+    background: var(--surface);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ef4444; }
+  .dot.y { background: #f59e0b; }
+  .dot.g { background: #10b981; }
+  .terminal-title { font-size: 11px; color: var(--muted); margin-left: 8px; letter-spacing: 0.1em; }
+  .terminal-body { padding: 20px 20px; font-size: 12px; line-height: 2; }
+  .t-scan  { color: var(--warn); }
+  .t-buy   { color: var(--accent2); }
+  .t-sell  { color: var(--danger); }
+  .t-info  { color: var(--accent); }
+  .t-dim   { color: var(--dimmed); }
+  .t-white { color: #f1f5f9; }
+  .cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); animation: blink 1s step-end infinite; vertical-align: middle; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .footer-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .footer-note { font-size: 11px; color: var(--dimmed); max-width: 400px; line-height: 1.6; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; }
+  .footer-links a:hover { color: var(--accent); }
+
+  /* ── TWO-COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+    .strategy-row { grid-template-columns: 1fr; }
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .section { padding: 60px 20px; }
+    .stats-band { flex-wrap: wrap; }
+    footer { flex-direction: column; text-align: center; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">◈</div>
+    APEX ALGO
+  </div>
+  <div class="nav-links">
+    <a href="#features">FEATURES</a>
+    <a href="#strategies">STRATEGIES</a>
+    <a href="#pricing">PRICING</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <button class="btn-nav" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})">START FREE TRIAL →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">MULTI-STRATEGY ALGORITHMIC TRADING</div>
+  <h1>
+    <span class="block">THREE STRATEGIES.</span>
+    TRADE LIKE A <span class="accent">QUANT.</span>
+  </h1>
+  <p class="hero-sub">
+    Apex Algo scans 20+ stocks every 30 seconds using RSI mean reversion, EMA momentum, and volatility breakout algorithms. Auto-executes bracket orders with built-in risk management.
+  </p>
+  <div class="hero-cta">
+    <a href="#pricing" class="btn-primary">GET STARTED — $49/MO →</a>
+    <a href="#features" class="btn-ghost">SEE HOW IT WORKS</a>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker">
+    <!-- JS fills this -->
+  </div>
+</div>
+
+<!-- STATS BAND -->
+<div class="stats-band">
+  <div class="stat-item fade-up">
+    <div class="stat-num">3</div>
+    <div class="stat-label">LIVE ALGORITHMS</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">20+</div>
+    <div class="stat-label">SYMBOLS SCANNED</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">30s</div>
+    <div class="stat-label">SCAN INTERVAL</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">0</div>
+    <div class="stat-label">EMOTIONS</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">BRACKET ORDERS</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">PLATFORM FEATURES</div>
+  <h2 class="section-title">Everything a serious<br>retail trader needs.</h2>
+  <p class="section-sub">No black box. You see every signal, score, and reason before and after execution.</p>
+
+  <div class="feature-grid fade-up">
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">Live Signal Scanner</div>
+      <div class="feature-desc">Continuously scans your watchlist every 30 seconds. Each symbol gets scored across all three algorithms and ranked by conviction.</div>
+      <div class="feature-tag">REAL-TIME</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🛡</span>
+      <div class="feature-title">Bracket-Only Orders</div>
+      <div class="feature-desc">Every trade is automatically wrapped in a bracket order — stop loss and take profit set at entry. You can never be caught without protection.</div>
+      <div class="feature-tag">RISK MANAGED</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎚</span>
+      <div class="feature-title">3-Level Risk Control</div>
+      <div class="feature-desc">Low, Medium, or High risk profiles control position size (1.5%–8% of equity), stop distance, profit target, and max open trades simultaneously.</div>
+      <div class="feature-tag">CONFIGURABLE</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🧪</span>
+      <div class="feature-title">Simulation Mode</div>
+      <div class="feature-desc">Paper trade with $100k virtual equity before going live. The full algorithm runs on simulated price data — no API keys needed.</div>
+      <div class="feature-tag">NO RISK</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔄</span>
+      <div class="feature-title">Auto-Trade Engine</div>
+      <div class="feature-desc">Set your minimum confidence threshold and let the engine execute autonomously. Flips off with one toggle — you're always in control.</div>
+      <div class="feature-tag">AUTONOMOUS</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📋</span>
+      <div class="feature-title">Transparent Signals</div>
+      <div class="feature-desc">Every signal shows the algorithms that triggered it, the score breakdown, and a confidence percentage. No black box — understand every trade.</div>
+      <div class="feature-tag">TRANSPARENT</div>
+    </div>
+  </div>
+</section>
+
+<!-- TERMINAL DEMO -->
+<div style="border-top:1px solid var(--border); border-bottom:1px solid var(--border); background: var(--surface);">
+  <div style="max-width:1200px; margin:0 auto; padding:60px 48px;">
+    <div class="two-col">
+      <div>
+        <div class="section-label">LIVE ACTIVITY LOG</div>
+        <h2 class="section-title" style="font-size:clamp(24px,3vw,36px)">Watch the engine work in real time.</h2>
+        <p style="font-size:13px; color:var(--muted); line-height:1.7; margin-top:12px;">
+          Every scan, signal, and trade is logged with timestamps. You always know exactly what the algorithm is doing and why.
+        </p>
+      </div>
+      <div class="terminal fade-up">
+        <div class="terminal-bar">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div>
+          <span class="terminal-title">APEX ALGO — ACTIVITY LOG</span>
+        </div>
+        <div class="terminal-body" id="termBody">
+          <div><span class="t-dim">09:31:04</span> <span class="t-scan">[SCAN]</span> <span class="t-white">Scanning 20 symbols...</span></div>
+          <div><span class="t-dim">09:31:06</span> <span class="t-buy">[TRADE]</span> <span class="t-white">BUY 12 NVDA @ $876.40 | Stop $832.58 | Target $1007.86</span></div>
+          <div><span class="t-dim">09:31:06</span> <span class="t-info">[INFO]</span> <span class="t-white">NVDA: BREAKOUT + MOMENTUM aligned (+4.0 score)</span></div>
+          <div><span class="t-dim">09:31:07</span> <span class="t-scan">[SCAN]</span> <span class="t-white">Done. 5 actionable signals.</span></div>
+          <div><span class="t-dim">09:32:34</span> <span class="t-scan">[SCAN]</span> <span class="t-white">Scanning 20 symbols...</span></div>
+          <div><span class="t-dim">09:32:36</span> <span class="t-buy">[TRADE]</span> <span class="t-white">BUY 47 SOFI @ $8.14 | Stop $7.73 | Target $9.36</span></div>
+          <div><span class="t-dim">09:32:38</span> <span class="t-scan">[SCAN]</span> <span class="t-white">Done. 3 actionable signals.</span></div>
+          <div><span class="t-dim">09:33:05</span> <span class="t-buy">[TRADE]</span> <span class="t-white">CLOSED NVDA P&L: +$312.40</span></div>
+          <div><span class="t-dim">09:34:07</span> <span class="t-sell">[TRADE]</span> <span class="t-white">CLOSED SOFI P&L: -$48.22</span></div>
+          <div><span class="t-dim">09:34:39</span> <span class="t-scan">[SCAN]</span> <span class="t-white">Scanning 20 symbols...</span> <span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STRATEGIES -->
+<section class="section" id="strategies">
+  <div class="section-label">ALGORITHM BREAKDOWN</div>
+  <h2 class="section-title">Three strategies.<br>One conviction score.</h2>
+  <p class="section-sub">Signals from all three algorithms are weighted and combined. Only high-conviction setups cross your confidence threshold.</p>
+
+  <div class="strategy-row fade-up">
+    <div class="strat-card" style="border-top: 3px solid #a78bfa;">
+      <div class="strat-badge" style="background:#4c1d95; color:#c4b5fd;">WEIGHT 2.0</div>
+      <div class="strat-name" style="color:#c4b5fd;">MEAN REVERSION</div>
+      <div class="strat-desc">
+        RSI(14) + Bollinger Bands(20). Buys when RSI drops below 32 and price touches the lower band. Sells the reverse. Catches overextended moves snapping back.
+      </div>
+    </div>
+    <div class="strat-card" style="border-top: 3px solid #fcd34d;">
+      <div class="strat-badge" style="background:#78350f; color:#fcd34d;">WEIGHT 1.5</div>
+      <div class="strat-name" style="color:#fcd34d;">EMA MOMENTUM</div>
+      <div class="strat-desc">
+        9/21 EMA crossover system. Goes long when the fast EMA crosses above the slow, short on the reverse. Rides directional momentum in trending conditions.
+      </div>
+    </div>
+    <div class="strat-card" style="border-top: 3px solid #6ee7b7;">
+      <div class="strat-badge" style="background:#064e3b; color:#6ee7b7;">WEIGHT 2.5</div>
+      <div class="strat-name" style="color:#6ee7b7;">VOL BREAKOUT</div>
+      <div class="strat-desc">
+        ATR + volume surge detection. Triggers on 5-bar high/low breaks with 1.4× above-average volume. Catches institutional moves at the earliest possible point.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing" style="border-top:1px solid var(--border);">
+  <div class="section-label">PRICING</div>
+  <h2 class="section-title">Simple, transparent pricing.</h2>
+  <p class="section-sub">Cancel anytime. No hidden fees. Works with any Alpaca account — free paper trading account included.</p>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">STARTER</div>
+      <div class="price-amount"><sup>$</sup>0<sub>/mo</sub></div>
+      <p class="price-desc">Simulation mode only. Test the full algorithm on virtual capital with no risk and no commitment.</p>
+      <ul class="price-features">
+        <li>Full simulation mode ($100k virtual)</li>
+        <li>All 3 algorithms active</li>
+        <li>20 symbol watchlist</li>
+        <li class="dimmed">Paper trading (real market data)</li>
+        <li class="dimmed">Live trading</li>
+        <li class="dimmed">Priority support</li>
+      </ul>
+      <a href="#" class="btn-price outline">START FREE</a>
+    </div>
+
+    <div class="price-card featured">
+      <div class="price-tier">PRO</div>
+      <div class="price-amount"><sup>$</sup>49<sub>/mo</sub></div>
+      <p class="price-desc">Full access. Paper and live trading via your Alpaca account. This is where the real edge is.</p>
+      <ul class="price-features">
+        <li>Everything in Starter</li>
+        <li>Paper trading (real market data)</li>
+        <li>Live trading (your Alpaca keys)</li>
+        <li>Custom watchlist (unlimited symbols)</li>
+        <li>Configurable scan interval</li>
+        <li>Email support</li>
+      </ul>
+      <a href="https://buy.stripe.com/aFaeV61dQ4STgz190sdjO0e" class="btn-price primary">START 7-DAY TRIAL →</a>
+    </div>
+
+    <div class="price-card">
+      <div class="price-tier">LIFETIME</div>
+      <div class="price-amount"><sup>$</sup>299<sub> once</sub></div>
+      <p class="price-desc">Pay once, use forever. Best value for committed traders who want zero ongoing cost.</p>
+      <ul class="price-features">
+        <li>Everything in Pro</li>
+        <li>Lifetime updates</li>
+        <li>No monthly fees, ever</li>
+        <li>Priority support</li>
+        <li>Strategy customization guide</li>
+        <li>Early access to new features</li>
+      </ul>
+      <a href="https://buy.stripe.com/7sY3co5u6cllaaDgsUdjO0f" class="btn-price outline">BUY LIFETIME →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq" style="border-top:1px solid var(--border);">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title">Common questions.</h2>
+  <br>
+  <div class="faq-list fade-up">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Do I need an Alpaca account?
+        <span class="arrow">+</span>
+      </div>
+      <div class="faq-a">For Simulation mode, no — the engine runs entirely on synthetic price data, no account needed. For Paper or Live trading, you'll need a free Alpaca brokerage account. Alpaca paper accounts are free and take about 5 minutes to set up at alpaca.markets.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Does this guarantee profits?
+        <span class="arrow">+</span>
+      </div>
+      <div class="faq-a">No. No trading system guarantees profits. Algorithmic trading involves significant risk and past simulated performance does not indicate future results. Only trade with capital you can afford to lose, and always start in simulation or paper mode before going live.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        How does the risk management work?
+        <span class="arrow">+</span>
+      </div>
+      <div class="faq-a">Every trade is a bracket order — stop loss and take profit are submitted at the same time as the entry. Low risk sizes 1.5% of equity per trade with a 1.5% stop. Medium is 4% size / 3% stop. High is 8% size / 5% stop. The system also enforces a maximum number of simultaneous open positions per risk level.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Where does my API key go? Is it safe?
+        <span class="arrow">+</span>
+      </div>
+      <div class="faq-a">Your Alpaca API key is entered directly in the app and sent only to Alpaca's servers. It is never stored on our servers. You can use a paper-trading-only key for additional safety — Alpaca lets you create keys with restricted permissions.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Can I cancel anytime?
+        <span class="arrow">+</span>
+      </div>
+      <div class="faq-a">Yes. Cancel from your account settings with one click. No cancellation fees, no questions asked. Your access continues until the end of your current billing period.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">◈ APEX ALGO</div>
+    <div class="footer-note" style="margin-top:8px;">
+      Algorithmic trading involves risk. Past performance does not guarantee future results. Not financial advice.
+    </div>
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Support</a>
+    <a href="https://alpaca.markets" target="_blank">Alpaca →</a>
+  </div>
+</footer>
+
+<script>
+  // ── TICKER ──
+  const tickers = [
+    {s:'NVDA',p:'876.40',c:'+3.2%',up:true},{s:'AAPL',p:'186.20',c:'+0.8%',up:true},
+    {s:'TSLA',p:'194.80',c:'-1.4%',up:false},{s:'META',p:'521.10',c:'+2.1%',up:true},
+    {s:'COIN',p:'247.30',c:'+5.6%',up:true},{s:'AMD',p:'162.40',c:'+1.9%',up:true},
+    {s:'SPY',p:'536.90',c:'+0.4%',up:true},{s:'PLTR',p:'24.80',c:'-0.9%',up:false},
+    {s:'MSFT',p:'421.50',c:'+0.6%',up:true},{s:'AMZN',p:'196.20',c:'+1.2%',up:true},
+    {s:'MARA',p:'18.40',c:'+4.1%',up:true},{s:'QQQ',p:'461.20',c:'+0.7%',up:true},
+  ];
+
+  const track = document.getElementById('ticker');
+  const html = [...tickers,...tickers].map(t =>
+    `<div class="ticker-item">
+      <span class="ticker-sym">${t.s}</span>
+      <span class="ticker-val">$${t.p}</span>
+      <span class="ticker-chg ${t.up?'up':'dn'}">${t.c}</span>
+    </div>`
+  ).join('');
+  track.innerHTML = html;
+
+  // ── FAQ ──
+  function toggleFaq(el) {
+    const item = el.closest('.faq-item');
+    item.classList.toggle('open');
+  }
+
+  // ── SCROLL ANIMATIONS ──
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
