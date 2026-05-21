@@ -11,7 +11,7 @@ const RISK = {
   medium: { pct:0.04,  stop:0.03,  target:0.06,  max:5,  color:"#f59e0b", label:"MED"  },
   high:   { pct:0.08,  stop:0.05,  target:0.15,  max:8,  color:"#ef4444", label:"HIGH" },
 };
-const PROXY_URL = "http://localhost:3001"
+const PROXY_URL = "apex-proxy-production-3908.up.railway.app"
 // ─── SIMULATION: Generate fake OHLCV bars ─────────────────────────────────────
 function generateSimBars(basePrice, count = 60) {
   const bars = [];
