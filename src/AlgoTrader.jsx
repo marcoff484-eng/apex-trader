@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const PROXY_URL = “apex-proxy-production-3908.up.railway.app”;
+const PROXY_URL = "https://apex-proxy-production-3908.up.railway.app";
 
 const DEFAULT_WATCHLIST = [
   "AAPL","MSFT","NVDA","TSLA","AMZN","META","GOOGL","AMD","SPY","QQQ",
